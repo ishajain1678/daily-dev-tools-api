@@ -2,42 +2,59 @@ const express = require('express');
 const router = express.Router();
 
 let todos = [
-  { id: 1, text: "Learn Express Routing", completed: false }
+  { id: 1, text: "Learn Express Routing", isCompleted: false }
 ];
+
+let currentId = 2;
 
 // GET all todos
 router.get('/', (req, res) => {
   res.json(todos);
 });
 
-// POST new todo
+// POST a new todo
 router.post('/', (req, res) => {
   const { text } = req.body;
+
   const newTodo = {
-    id: Date.now(),
+    id: currentId++,
     text,
-    completed: false
+    isCompleted: false
   };
+
   todos.push(newTodo);
   res.status(201).json(newTodo);
 });
 
-// PUT update todo
+
 router.put('/:id', (req, res) => {
-  const { id } = req.params;
-  const { text, completed } = req.body;
-  const todo = todos.find(t => t.id == id);
+  const id = parseInt(req.params.id);
+  const { text, isCompleted } = req.body;
+
+  const todo = todos.find(t => t.id === id);
   if (!todo) return res.status(404).json({ message: "Todo not found" });
+
   if (text !== undefined) todo.text = text;
-  if (completed !== undefined) todo.completed = completed;
+  if (isCompleted !== undefined) todo.isCompleted = isCompleted;
+
   res.json(todo);
 });
 
-// DELETE a todo
+
+router.patch('/:id/complete', (req, res) => {
+  const id = parseInt(req.params.id);
+  const todo = todos.find(t => t.id === id);
+  if (!todo) return res.status(404).json({ error: 'Not found' });
+
+  todo.isCompleted = !todo.isCompleted;
+  res.json(todo);
+});
+
+
 router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  todos = todos.filter(t => t.id != id);
+  const id = parseInt(req.params.id);
+  todos = todos.filter(t => t.id !== id);
   res.json({ message: "Todo deleted" });
 });
 
-module.exports = router; // ✅ important
+module.exports = router;
